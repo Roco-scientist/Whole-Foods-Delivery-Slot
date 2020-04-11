@@ -254,7 +254,7 @@ def get_wf_slot(product_url: str) -> None:
         raise RuntimeError("Browser type not recognized")
     driver.get(product_url)
     html = driver.page_source
-    soup = bs4.BeautifulSoup(html)
+    soup = bs4.BeautifulSoup(html, 'html.parser')
     time.sleep(60)
     no_open_slots = True
 
@@ -262,7 +262,7 @@ def get_wf_slot(product_url: str) -> None:
         driver.refresh()
         print("refreshed")
         html = driver.page_source
-        soup = bs4.BeautifulSoup(html)
+        soup = bs4.BeautifulSoup(html, 'html.parser')
         time.sleep(4)
         if ARGS.amazon_fresh:
             no_open_slots = amazon_fresh(driver, soup)
