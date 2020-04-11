@@ -38,6 +38,11 @@ def send_text(message: str) -> None:
     :message: the message sent as a text
     :return: No return
     """
+    if not os.path.exists("./info.csv"):
+        raise RuntimeError("Unable to send text\ninfo.csv does not exist\ncreate comma sepparated \
+                info.csv file with 4 columns\nColumn_1 containing twilio account sid\nColumn_2 \
+                containing authorization token\nColumn_3 containing your personal number to text \
+                to\nColumn_4 containing the from number created within twilio")
     with open("info.csv", "r") as info_file:
         info_file.readline()  # remove the column headers and go to row 1
         account_sid, auth_token, to_num, from_num = info_file.readline().split(",")  # split values by comma
