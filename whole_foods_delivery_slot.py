@@ -1,3 +1,4 @@
+import argparse
 import os
 import time
 
@@ -6,14 +7,25 @@ from selenium import webdriver
 from twilio.rest import Client
 
 
+def arguments():
+    """
+    Arguments for the script
+    """
+    parser = argparse.ArgumentParser(
+        description="Pings Amazon Prim Whole Foods for open delivery slots")
+    parser.add_argument("-b", dest="browser", type=str, default="chrome",
+                        choices=("firefox", "chrome"), help="browsert type")
+    return parser.parse_args()
+
+
 def send_text(message: str) -> None:
     """
-    Uses trilio to send a tex message
+    Uses twilio to send a tex message
 
     Setup an account with trilio.  An additional file is created called info.csv in the same
-    directory.  Have 4 columns, column name doesn't matter, but the first row content is your account sid,
-    authorization token, your number to text to and setup with the account, the from number created
-    by trilio.
+    directory.  Have 4 columns, column name doesn't matter, but the first row content is your
+    account sid, authorization token, your number to text to and setup with the account, and
+    the from number created by twilio.
 
     :message: the message sent as a text
     :return: No return
@@ -35,8 +47,12 @@ def getWFSlot(productUrl: str) -> None:
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36',
     }
-
-    driver = webdriver.Chrome()
+    if ARGS.browser == "chrome":
+        driver = webdriver.Chrome()
+    elif ARGS.browser == "firefox":
+        driver = webdriver.Firefox()
+    else:
+        raise RuntimeError("Browser type not recognized")
     driver.get(productUrl)
     html = driver.page_source
     soup = bs4.BeautifulSoup(html)
@@ -87,4 +103,10 @@ def getWFSlot(productUrl: str) -> None:
             no_open_slots = False
 
 
-getWFSlot('https://www.amazon.com/gp/buy/shipoptionselect/handlers/display.html?hasWorkingJavascript=1')
+def main() -> None:
+    getWFSlot('https://www.amazon.com/gp/buy/shipoptionselect/handlers/display.html?hasWorkingJavascript=1')
+
+
+if __name__ == "__main__":
+    ARGS = arguments()
+    main()
