@@ -13,13 +13,13 @@ Yes, amid COVID-19 trying to get Whole Foods and Amazon Fresh delivery slots can
 ## Usage:
 Supports **MacOS, Linux, and Windows**.
 
-The script works on **Chrome** (```whole_foods_delivery_slot_chrome.py``` for Whole Foods) (```amazon_fresh_delivery_slot_chrome.py``` for Amazon Fresh) and **FireFox** (```whole_foods_delivery_slot_firefox.py```) for now. This does not support "Autobuy feature".
+The script works on **Chrome** (```whole_foods_delivery_slot.py``` for Whole Foods) (```whole_foods_delivery_slot.py -f``` for Amazon Fresh) and **FireFox** (```whole_foods_delivery_slot.py -b firefox```) for now. This does not support "Autobuy feature".
 
-Note, use the ```whole_foods_delivery_windows.py``` for Windows. Also, only for this OS, you'll have to install an additional package ```winsound```
+Windows, only for this OS, you'll have to install an additional package ```winsound```
 
 ### Autobuy feature:
 
-If you'd like the script to select the first available time, and proceed all the way through checkout, please use the ```whole_foods_delivery_autobuy.py```. 
+If you'd like the script to select the first available time, and proceed all the way through checkout, please use the ```whole_foods_delivery_slot.py -a```. 
  
 It initializes a  webdriver, for which if you don't have one install it from: https://chromedriver.chromium.org/ for Chrome and https://github.com/mozilla/geckodriver/releases for FireFox.
 
@@ -38,7 +38,7 @@ _The script works after you have added all the items to your cart! Note, have yo
 _Walkthrough for Chrome for Whole Foods, follow same steps if running on FireFox with the FireFox script_
 
 1. Run the requirements.txt (```$ pip install -r requirements.txt```)
-2. Run whole_foods_delivery_slot_chrome.py (``` $ python whole_foods_delivery_slot_chrome.py```)
+2. Run whole_foods_delivery_slot_chrome.py (``` $ python whole_foods_delivery_slot.py```)
 3. The first time you run this script, Whole Foods cart will ask you to login. After you login, go to the "Shipping and Payment" window. Its titled: _Schedule your order_. Leave the script running.
 4. Get a nice warm Tea, browse reddit, do something on Xbox, etc.
 5. Once a slot opens the script will verbally notify you of an open slot.
