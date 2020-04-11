@@ -4,6 +4,10 @@ import time
 
 import bs4
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 from twilio.rest import Client
 
 
@@ -11,10 +15,14 @@ def arguments():
     """
     Arguments for the script
     """
-    parser = argparse.ArgumentParser(
-        description="Pings Amazon Prim Whole Foods for open delivery slots")
+    parser = argparse\
+        .ArgumentParser(description="Pings Amazon Prim Whole Foods for open delivery slots")
     parser.add_argument("-b", dest="browser", type=str, default="chrome",
                         choices=("firefox", "chrome"), help="browser type [default: chrome]")
+    parser.add_argument("-a", dest="autocheckout", type=bool, action="store_true",
+                        help="Use autocheckout with chrome")
+    parser.add_argument("-t", dest="send_text", type=bool, action="store_true",
+                        help="Send a text using information from info.csv")
     return parser.parse_args()
 
 
@@ -41,6 +49,61 @@ def send_text(message: str) -> None:
         to=to_num,
         from_=from_num
     )
+
+
+def autoCheckout(driver):
+    driver = driver
+
+    time.sleep(1)
+    try:
+        slot_select_button = driver.find_element_by_xpath(
+            '/html/body/div[5]/div[1]/div/div[2]/div/div/div/div/div[1]/div[4]/div[2]/div/div[3]/div/div/ul/li/span/span/div/div[2]/span/span/button')
+        slot_select_button.click()
+        print("Clicked open slot")
+    except NoSuchElementException:
+        slot_select_button = driver.find_element_by_xpath(
+            '/html/body/div[5]/div[1]/div/div[2]/div/div/div/div/div[1]/div[4]/div[2]/div/div[4]/div/div/ul/li/span/span/div/div[2]/span/span/button')
+        slot_select_button.click()
+
+    slot_continue_button = driver.find_element_by_xpath(
+        '/html/body/div[5]/div[1]/div/div[2]/div/div/div/div/div[2]/div[3]/div/span/span/span/input')
+    slot_continue_button.click()
+    print("Selected slot and continued to next page")
+
+    try:
+        time.sleep(6)
+        outofstock_select_continue = driver.find_element_by_xpath(
+            '/html/body/div[5]/div/form/div[25]/div/div/span/span/input')
+        outofstock_select_continue.click()
+        print("Passed out of stock")
+    except NoSuchElementException:
+        pass
+
+    try:
+        time.sleep(6)
+        payment_select_continue = driver.find_element_by_xpath(
+            '/html/body/div[5]/div[1]/div[2]/div[2]/div[4]/div/form/div[3]/div[1]/div[2]/div/div/div/div[1]/span/span/input')
+        payment_select_continue.click()
+        print("Payment method selected")
+
+        time.sleep(6)
+        try:
+            review_select_continue = driver.find_element_by_xpath(
+                '/html/body/div[5]/div[1]/div[2]/form/div/div/div/div[2]/div/div[1]/div/div[1]/div/span/span/input')
+            review_select_continue.click()
+            print("Order reviewed")
+        except NoSuchElementException:
+            review_select_continue = driver.find_element_by_xpath(
+                '/html/body/div[5]/div[1]/div[2]/form/div/div/div/div[2]/div[2]/div/div[1]/span/span/input')
+            review_select_continue.click()
+            print("Order reviewed")
+
+        print("Order Placed!")
+        os.system('say "Order Placed!"')
+    except NoSuchElementException:
+        print("Found a slot but it got taken, run script again.")
+        os.system('say "Found a slot but it got taken, run script again."')
+        time.sleep(1400)
 
 
 def getWFSlot(productUrl: str) -> None:
@@ -71,11 +134,14 @@ def getWFSlot(productUrl: str) -> None:
             next_slot_text = soup.find(
                 'h4', class_='ufss-slotgroup-heading-text a-text-normal').text
             if any(next_slot_text in slot_pattern for slot_pattern in slot_patterns):
-                send_text("Whole foods 1 slot open")
+                if ARGS.send_text:
+                    send_text("Whole foods 1 slot open")
                 print('SLOTS OPEN 1!')
                 os.system('say "Slots for delivery opened!"')
                 no_open_slots = False
                 time.sleep(1400)
+                if ARGS.autocheckout:
+                    autoCheckout(driver)
         except AttributeError:
             pass
 
@@ -84,10 +150,13 @@ def getWFSlot(productUrl: str) -> None:
             all_dates = soup.findAll("div", {"class": "ufss-date-select-toggle-text-availability"})
             for each_date in all_dates:
                 if slot_opened_text not in each_date.text:
-                    send_text("Whole foods 2 slot open")
+                    if ARGS.send_text:
+                        send_text("Whole foods 2 slot open")
                     print('SLOTS OPEN 2!')
                     os.system('say "Slots for delivery opened!"')
                     no_open_slots = False
+                    if ARGS.autocheckout:
+                        autoCheckout(driver)
                     time.sleep(1400)
         except AttributeError:
             pass
@@ -97,10 +166,13 @@ def getWFSlot(productUrl: str) -> None:
             if no_slot_pattern == soup.find('h4', class_='a-alert-heading').text:
                 print("NO SLOTS!")
         except AttributeError:
-            send_text("Whole foods 3 slot open")
+            if ARGS.send_text:
+                send_text("Whole foods 3 slot open")
             print('SLOTS OPEN 3!')
             os.system('say "Slots for delivery opened!"')
             no_open_slots = False
+            if ARGS.autocheckout:
+                autoCheckout(driver)
 
 
 def main() -> None:
@@ -109,4 +181,6 @@ def main() -> None:
 
 if __name__ == "__main__":
     ARGS = arguments()
+    if ARGS.browser == "firefox" and ARGS.autocheckout:
+        raise RuntimeError("Auto checkout only available with chrome")
     main()
