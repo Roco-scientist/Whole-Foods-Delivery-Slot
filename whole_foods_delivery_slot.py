@@ -1,6 +1,7 @@
 import argparse
 import os
 import time
+import os
 
 import bs4
 from selenium import webdriver
@@ -54,6 +55,13 @@ def send_text(message: str) -> None:
         to=to_num,
         from_=from_num
     )
+
+
+def windows_beep():
+    import winsound
+    duration = 1000
+    freq = 440
+    winsound.Beep(freq, duration)
 
 
 def autoCheckout(driver):
@@ -145,6 +153,8 @@ def getWFSlot(productUrl: str) -> None:
                 os.system('say "Slots for delivery opened!"')
                 no_open_slots = False
                 time.sleep(1400)
+                if os.name == "nt":
+                    windows_beep()
                 if ARGS.autocheckout:
                     autoCheckout(driver)
         except AttributeError:
@@ -160,6 +170,8 @@ def getWFSlot(productUrl: str) -> None:
                     print('SLOTS OPEN 2!')
                     os.system('say "Slots for delivery opened!"')
                     no_open_slots = False
+                    if os.name == "nt":
+                        windows_beep()
                     if ARGS.autocheckout:
                         autoCheckout(driver)
                     time.sleep(1400)
@@ -176,6 +188,8 @@ def getWFSlot(productUrl: str) -> None:
             print('SLOTS OPEN 3!')
             os.system('say "Slots for delivery opened!"')
             no_open_slots = False
+            if os.name == "nt":
+                windows_beep()
             if ARGS.autocheckout:
                 autoCheckout(driver)
 
