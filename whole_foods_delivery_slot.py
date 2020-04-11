@@ -29,7 +29,7 @@ def arguments():
 
 def send_text(message: str) -> None:
     """
-    Uses twilio to send a tex message
+    Uses twilio to send a text message
 
     Setup an account with twilio.  An additional file is created called info.csv in the same
     directory.  Have 4 columns, column name doesn't matter, but the first row content is your
@@ -39,7 +39,7 @@ def send_text(message: str) -> None:
     :message: the message sent as a text
     :return: No return
     """
-    if not os.path.exists("./info.csv"):
+    if not os.path.isfile("info.csv"):
         raise RuntimeError("Unable to send text\ninfo.csv does not exist\ncreate comma sepparated \
                 info.csv file with 4 columns\nColumn_1 containing twilio account sid\nColumn_2 \
                 containing authorization token\nColumn_3 containing your personal number to text \
