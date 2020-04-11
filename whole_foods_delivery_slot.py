@@ -1,15 +1,15 @@
 import argparse
 import os
 import time
-import os
 
 import bs4
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
 from twilio.rest import Client
+try:
+    import winsound
+except ImportError:
+    pass
 
 
 def arguments():
@@ -62,14 +62,20 @@ def send_text(message: str) -> None:
     )
 
 
-def windows_beep():
-    import winsound
+def windows_beep() -> None:
+    """
+    When the system is found to be windows, this creates a beep when a slot is open
+    """
     duration = 1000
     freq = 440
     winsound.Beep(freq, duration)
 
 
-def autoCheckout(driver):
+def autoCheckout(driver) -> None:
+    """
+    Checks out with prime now.  Has not been tested with amazon fresh, therefore is not an option
+    with that argument
+    """
     driver = driver
 
     time.sleep(1)
@@ -124,7 +130,12 @@ def autoCheckout(driver):
         time.sleep(1400)
 
 
-def prime_now(driver, soup):
+def prime_now(driver, soup) -> bool:
+    """
+    Check for open slots for Prime Now
+
+    :return: a bool of if there are no_open_slots
+    """
     no_open_slots = True
     slot_patterns = ['Next available', '1-hour delivery windows', '2-hour delivery windows']
     try:
@@ -179,7 +190,12 @@ def prime_now(driver, soup):
     return no_open_slots
 
 
-def amazon_fresh(driver, soup):
+def amazon_fresh(driver, soup) -> bool:
+    """
+    Check for open slots for amazon fresh
+
+    :return: a bool of if there are no_open_slots
+    """
     no_open_slots = True
     no_open_slots = "No doorstep delivery windows are available for"
     try:
@@ -190,11 +206,19 @@ def amazon_fresh(driver, soup):
         else:
             print('SLOTS OPEN!')
             os.system('say "Slots for delivery opened!"')
+            if ARGS.send_text:
+                send_text("Amazon fresh slot open")
+            if os.name == "nt":
+                windows_beep()
             no_open_slots = False
             time.sleep(1400)
     except NoSuchElementException:
         print('SLOTS OPEN!')
         os.system('say "Slots for delivery opened!"')
+        if ARGS.send_text:
+            send_text("Amazon fresh slot open")
+        if os.name == "nt":
+            windows_beep()
         no_open_slots = False
         time.sleep(1400)
 
@@ -203,6 +227,10 @@ def amazon_fresh(driver, soup):
         if open_slots != "false":
             print('SLOTS OPEN!')
             os.system('say "Slots for delivery opened!"')
+            if ARGS.send_text:
+                send_text("Amazon fresh slot open")
+            if os.name == "nt":
+                windows_beep()
             no_open_slots = False
             time.sleep(1400)
     except AttributeError:
@@ -210,7 +238,11 @@ def amazon_fresh(driver, soup):
     return no_open_slots
 
 
-def getWFSlot(productUrl: str) -> None:
+def get_wf_slot(product_url: str) -> None:
+    """
+    Opens the browser and finds if there is a slot.  Depending on arguments, may also checkout
+    :product_url: Amazon checkout URL
+    """
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36',
     }
@@ -220,7 +252,7 @@ def getWFSlot(productUrl: str) -> None:
         driver = webdriver.Firefox()
     else:
         raise RuntimeError("Browser type not recognized")
-    driver.get(productUrl)
+    driver.get(product_url)
     html = driver.page_source
     soup = bs4.BeautifulSoup(html)
     time.sleep(60)
@@ -233,17 +265,23 @@ def getWFSlot(productUrl: str) -> None:
         soup = bs4.BeautifulSoup(html)
         time.sleep(4)
         if ARGS.amazon_fresh:
-            no_open_slots = amazon_fresh
+            no_open_slots = amazon_fresh(driver, soup)
         else:
             no_open_slots = prime_now(driver, soup)
 
 
 def main() -> None:
-    getWFSlot('https://www.amazon.com/gp/buy/shipoptionselect/handlers/display.html?hasWorkingJavascript=1')
+    """
+    Runs the program
+    """
+    get_wf_slot(
+        'https://www.amazon.com/gp/buy/shipoptionselect/handlers/display.html?hasWorkingJavascript=1')
 
 
 if __name__ == "__main__":
     ARGS = arguments()
     if ARGS.browser == "firefox" and ARGS.autocheckout:
         raise RuntimeError("Auto checkout only available with chrome")
+    if ARGS.amazon_fresh and ARGS.autocheckout:
+        raise RuntimeError("Auto checkout only available with Prime Now")
     main()
