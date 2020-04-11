@@ -35,7 +35,7 @@ _The script works after you have added all the items to your cart! Note, have yo
 
 ### Texting feature:
 
-If you'd like the script to text you when there is an open slot or when autobuy as finished ```whole_foods_delivery_slot.py -t```.
+If you'd like the script to text you when there is an open slot or when autobuy is finished ```whole_foods_delivery_slot.py -t```.
 
 This first requires setting up a twilio account and adding a twilio number.  This works with the free trial.  Aftwerwards create an `info.csv` file within the same directory you cloned this repository to.  This file needs to be comma separated with 4 columns, with a column header row and a data row with no index. The format can be seen below:
 
