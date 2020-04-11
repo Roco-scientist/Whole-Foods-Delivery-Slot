@@ -1,6 +1,7 @@
 - [Whole Foods and Amazon Fresh Delivery Slot Automated Script](#whole-foods-and-amazon-fresh-delivery-slot-automated-script)
   * [Usage:](#usage)
     + [Autobuy feature:](#autobuy-feature)
+    + [Texting feature:](#texting-feature)
     + [After you clone the project:](#after-you-clone-the-project)
  - [Non-coding background help:](#non-coding-background-help)
  - [Visual Aid](#visual-aid)
@@ -32,7 +33,20 @@ Script was written on Python 2.7.10
 
 _The script works after you have added all the items to your cart! Note, have your cart ready before running this script! Also, please don't let your computer sleep. Let your computer do the work, while you sleep_
 
+### Texting feature:
 
+If you'd like the script to text you when there is an open slot or when autobuy as finished ```whole_foods_delivery_slot.py -t```.
+
+This first requires setting up a twilio account and adding a twilio number.  This works with the free trial.  Aftwerwards create an `info.csv` file within the same directory you cloned this repository to.  This file needs to be comma separated with 4 columns, with a column header row and a data row with no index. The format can be seen below:
+
+<table>
+<tr>
+<td>Account_sid</td>,<td>Authorization_token</td>,<td>phone_number_to</td>,<td>twilio_phone_number_from</td>
+</tr>
+<tr>
+<td>value</td>,<td>value</td>,<td>value</td>,<td>value</td>
+</tr>
+</table>
 
 ### After you clone the project:
 _Walkthrough for Chrome for Whole Foods, follow same steps if running on FireFox with the FireFox script_
