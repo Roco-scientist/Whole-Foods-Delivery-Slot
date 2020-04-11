@@ -14,7 +14,7 @@ def arguments():
     parser = argparse.ArgumentParser(
         description="Pings Amazon Prim Whole Foods for open delivery slots")
     parser.add_argument("-b", dest="browser", type=str, default="chrome",
-                        choices=("firefox", "chrome"), help="browsert type")
+                        choices=("firefox", "chrome"), help="browser type [default: chrome]")
     return parser.parse_args()
 
 
@@ -22,17 +22,10 @@ def send_text(message: str) -> None:
     """
     Uses twilio to send a tex message
 
-<<<<<<< HEAD:whole_foods_delivery_slot.py
-    Setup an account with trilio.  An additional file is created called info.csv in the same
+    Setup an account with twilio.  An additional file is created called info.csv in the same
     directory.  Have 4 columns, column name doesn't matter, but the first row content is your
     account sid, authorization token, your number to text to and setup with the account, and
     the from number created by twilio.
-=======
-    Setup an account with twilio.  An additional file is created called info.csv in the same
-    directory.  Have 4 columns, column name doesn't matter, but the first row content is your account sid,
-    authorization token, your number to text to and setup with the account, the from number created
-    by trilio.
->>>>>>> 756f93cb9b3b81dfa24b73f60f49788ab380fa29:whole_foods_delivery_slot_chrome.py
 
     :message: the message sent as a text
     :return: No return
