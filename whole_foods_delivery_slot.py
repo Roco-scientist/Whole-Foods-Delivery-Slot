@@ -3,13 +3,10 @@ import os
 import time
 
 import bs4
+import pyttsx3
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from twilio.rest import Client
-try:
-    import winsound
-except ImportError:
-    pass
 
 
 def arguments():
@@ -60,15 +57,6 @@ def send_text(message: str) -> None:
         to=to_num,
         from_=from_num
     )
-
-
-def windows_beep() -> None:
-    """
-    When the system is found to be windows, this creates a beep when a slot is open
-    """
-    duration = 1000
-    freq = 440
-    winsound.Beep(freq, duration)
 
 
 def autoCheckout(driver) -> None:
@@ -123,10 +111,13 @@ def autoCheckout(driver) -> None:
             print("Order reviewed")
 
         print("Order Placed!")
-        os.system('say "Order Placed!"')
+        engine = pyttsx3.init()
+        engine.say("Order Placed!")
+        engine.runAndWait()
     except NoSuchElementException:
-        print("Found a slot but it got taken, run script again.")
-        os.system('say "Found a slot but it got taken, run script again."')
+        engine = pyttsx3.init()
+        engine.say("Found a slot but it got taken, run script again.")
+        engine.runAndWait()
         time.sleep(1400)
 
 
@@ -145,11 +136,11 @@ def prime_now(driver, soup) -> bool:
             if ARGS.send_text:
                 send_text("Whole foods 1 slot open")
             print('SLOTS OPEN 1!')
-            os.system('say "Slots for delivery opened!"')
+            engine = pyttsx3.init()
+            engine.say("Slots for delivery opened!")
+            engine.runAndWait()
             no_open_slots = False
             time.sleep(1400)
-            if os.name == "nt":
-                windows_beep()
             if ARGS.autocheckout:
                 autoCheckout(driver)
     except AttributeError:
@@ -163,10 +154,10 @@ def prime_now(driver, soup) -> bool:
                 if ARGS.send_text:
                     send_text("Whole foods 2 slot open")
                 print('SLOTS OPEN 2!')
-                os.system('say "Slots for delivery opened!"')
+                engine = pyttsx3.init()
+                engine.say("Slots for delivery opened!")
+                engine.runAndWait()
                 no_open_slots = False
-                if os.name == "nt":
-                    windows_beep()
                 if ARGS.autocheckout:
                     autoCheckout(driver)
                 time.sleep(1400)
@@ -181,10 +172,10 @@ def prime_now(driver, soup) -> bool:
         if ARGS.send_text:
             send_text("Whole foods 3 slot open")
         print('SLOTS OPEN 3!')
-        os.system('say "Slots for delivery opened!"')
+        engine = pyttsx3.init()
+        engine.say("Slots for delivery opened!")
+        engine.runAndWait()
         no_open_slots = False
-        if os.name == "nt":
-            windows_beep()
         if ARGS.autocheckout:
             autoCheckout(driver)
     return no_open_slots
@@ -205,20 +196,20 @@ def amazon_fresh(driver, soup) -> bool:
             pass
         else:
             print('SLOTS OPEN!')
-            os.system('say "Slots for delivery opened!"')
+            engine = pyttsx3.init()
+            engine.say("Slots for delivery opened!")
+            engine.runAndWait()
             if ARGS.send_text:
                 send_text("Amazon fresh slot open")
-            if os.name == "nt":
-                windows_beep()
             no_open_slots = False
             time.sleep(1400)
     except NoSuchElementException:
         print('SLOTS OPEN!')
-        os.system('say "Slots for delivery opened!"')
+        engine = pyttsx3.init()
+        engine.say("Slots for delivery opened!")
+        engine.runAndWait()
         if ARGS.send_text:
             send_text("Amazon fresh slot open")
-        if os.name == "nt":
-            windows_beep()
         no_open_slots = False
         time.sleep(1400)
 
@@ -226,11 +217,11 @@ def amazon_fresh(driver, soup) -> bool:
         open_slots = soup.find('div', class_='orderSlotExists').text()
         if open_slots != "false":
             print('SLOTS OPEN!')
-            os.system('say "Slots for delivery opened!"')
+            engine = pyttsx3.init()
+            engine.say("Slots for delivery opened!")
+            engine.runAndWait()
             if ARGS.send_text:
                 send_text("Amazon fresh slot open")
-            if os.name == "nt":
-                windows_beep()
             no_open_slots = False
             time.sleep(1400)
     except AttributeError:
