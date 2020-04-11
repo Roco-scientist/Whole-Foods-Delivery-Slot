@@ -24,6 +24,8 @@ def arguments():
                         help="Use autocheckout with chrome")
     parser.add_argument("-t", dest="send_text", action="store_true",
                         help="Send a text using information from info.csv")
+    parser.add_argument("-f", dest="amazon_fresh", action="store_true",
+                        help="use amazon fresh instead of prime now")
     return parser.parse_args()
 
 
@@ -122,6 +124,92 @@ def autoCheckout(driver):
         time.sleep(1400)
 
 
+def prime_now(driver, soup):
+    no_open_slots = True
+    slot_patterns = ['Next available', '1-hour delivery windows', '2-hour delivery windows']
+    try:
+        next_slot_text = soup.find(
+            'h4', class_='ufss-slotgroup-heading-text a-text-normal').text
+        if any(next_slot_text in slot_pattern for slot_pattern in slot_patterns):
+            if ARGS.send_text:
+                send_text("Whole foods 1 slot open")
+            print('SLOTS OPEN 1!')
+            os.system('say "Slots for delivery opened!"')
+            no_open_slots = False
+            time.sleep(1400)
+            if os.name == "nt":
+                windows_beep()
+            if ARGS.autocheckout:
+                autoCheckout(driver)
+    except AttributeError:
+        pass
+
+    try:
+        slot_opened_text = "Not available"
+        all_dates = soup.findAll("div", {"class": "ufss-date-select-toggle-text-availability"})
+        for each_date in all_dates:
+            if slot_opened_text not in each_date.text:
+                if ARGS.send_text:
+                    send_text("Whole foods 2 slot open")
+                print('SLOTS OPEN 2!')
+                os.system('say "Slots for delivery opened!"')
+                no_open_slots = False
+                if os.name == "nt":
+                    windows_beep()
+                if ARGS.autocheckout:
+                    autoCheckout(driver)
+                time.sleep(1400)
+    except AttributeError:
+        pass
+
+    try:
+        no_slot_pattern = 'No delivery windows available. New windows are released throughout the day.'
+        if no_slot_pattern == soup.find('h4', class_='a-alert-heading').text:
+            print("NO SLOTS!")
+    except AttributeError:
+        if ARGS.send_text:
+            send_text("Whole foods 3 slot open")
+        print('SLOTS OPEN 3!')
+        os.system('say "Slots for delivery opened!"')
+        no_open_slots = False
+        if os.name == "nt":
+            windows_beep()
+        if ARGS.autocheckout:
+            autoCheckout(driver)
+    return no_open_slots
+
+
+def amazon_fresh(driver, soup):
+    no_open_slots = True
+    no_open_slots = "No doorstep delivery windows are available for"
+    try:
+        no_slots_from_web = driver.find_element_by_xpath(
+            '/html/body/div[5]/div/div/div[2]/div/div/form/div[3]/div[4]/div/div[2]/div[2]/div[6]/div/div[2]/div/div[2]/div/div[20]/div[1]/div[1]/div/div/div/span').text
+        if no_open_slots in no_slots_from_web:
+            pass
+        else:
+            print('SLOTS OPEN!')
+            os.system('say "Slots for delivery opened!"')
+            no_open_slots = False
+            time.sleep(1400)
+    except NoSuchElementException:
+        print('SLOTS OPEN!')
+        os.system('say "Slots for delivery opened!"')
+        no_open_slots = False
+        time.sleep(1400)
+
+    try:
+        open_slots = soup.find('div', class_='orderSlotExists').text()
+        if open_slots != "false":
+            print('SLOTS OPEN!')
+            os.system('say "Slots for delivery opened!"')
+            no_open_slots = False
+            time.sleep(1400)
+    except AttributeError:
+        pass
+    return no_open_slots
+
+
 def getWFSlot(productUrl: str) -> None:
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36',
@@ -144,57 +232,10 @@ def getWFSlot(productUrl: str) -> None:
         html = driver.page_source
         soup = bs4.BeautifulSoup(html)
         time.sleep(4)
-
-        slot_patterns = ['Next available', '1-hour delivery windows', '2-hour delivery windows']
-        try:
-            next_slot_text = soup.find(
-                'h4', class_='ufss-slotgroup-heading-text a-text-normal').text
-            if any(next_slot_text in slot_pattern for slot_pattern in slot_patterns):
-                if ARGS.send_text:
-                    send_text("Whole foods 1 slot open")
-                print('SLOTS OPEN 1!')
-                os.system('say "Slots for delivery opened!"')
-                no_open_slots = False
-                time.sleep(1400)
-                if os.name == "nt":
-                    windows_beep()
-                if ARGS.autocheckout:
-                    autoCheckout(driver)
-        except AttributeError:
-            pass
-
-        try:
-            slot_opened_text = "Not available"
-            all_dates = soup.findAll("div", {"class": "ufss-date-select-toggle-text-availability"})
-            for each_date in all_dates:
-                if slot_opened_text not in each_date.text:
-                    if ARGS.send_text:
-                        send_text("Whole foods 2 slot open")
-                    print('SLOTS OPEN 2!')
-                    os.system('say "Slots for delivery opened!"')
-                    no_open_slots = False
-                    if os.name == "nt":
-                        windows_beep()
-                    if ARGS.autocheckout:
-                        autoCheckout(driver)
-                    time.sleep(1400)
-        except AttributeError:
-            pass
-
-        try:
-            no_slot_pattern = 'No delivery windows available. New windows are released throughout the day.'
-            if no_slot_pattern == soup.find('h4', class_='a-alert-heading').text:
-                print("NO SLOTS!")
-        except AttributeError:
-            if ARGS.send_text:
-                send_text("Whole foods 3 slot open")
-            print('SLOTS OPEN 3!')
-            os.system('say "Slots for delivery opened!"')
-            no_open_slots = False
-            if os.name == "nt":
-                windows_beep()
-            if ARGS.autocheckout:
-                autoCheckout(driver)
+        if ARGS.amazon_fresh:
+            no_open_slots = amazon_fresh
+        else:
+            no_open_slots = prime_now(driver, soup)
 
 
 def main() -> None:
