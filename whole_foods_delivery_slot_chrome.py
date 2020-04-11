@@ -8,9 +8,9 @@ from twilio.rest import Client
 
 def send_text(message: str) -> None:
     """
-    Uses trilio to send a tex message
+    Uses twilio to send a tex message
 
-    Setup an account with trilio.  An additional file is created called info.csv in the same
+    Setup an account with twilio.  An additional file is created called info.csv in the same
     directory.  Have 4 columns, column name doesn't matter, but the first row content is your account sid,
     authorization token, your number to text to and setup with the account, the from number created
     by trilio.
