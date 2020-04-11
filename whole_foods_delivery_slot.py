@@ -17,12 +17,12 @@ def arguments():
     Arguments for the script
     """
     parser = argparse\
-        .ArgumentParser(description="Pings Amazon Prim Whole Foods for open delivery slots")
+        .ArgumentParser(description="Pings Amazon Prime Whole Foods for open delivery slots")
     parser.add_argument("-b", dest="browser", type=str, default="chrome",
                         choices=("firefox", "chrome"), help="browser type [default: chrome]")
-    parser.add_argument("-a", dest="autocheckout", type=bool, action="store_true",
+    parser.add_argument("-a", dest="autocheckout", action="store_true",
                         help="Use autocheckout with chrome")
-    parser.add_argument("-t", dest="send_text", type=bool, action="store_true",
+    parser.add_argument("-t", dest="send_text", action="store_true",
                         help="Send a text using information from info.csv")
     return parser.parse_args()
 
